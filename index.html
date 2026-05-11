@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sirb — Find Your Skills</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #ECF0F6; min-height: 100vh; }
+
+    .wrap {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 2rem 1rem;
+    }
+
+    .card {
+      background: #fff; border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(27,45,92,0.10), 0 2px 8px rgba(27,45,92,0.05);
+      width: 100%; max-width: 500px; overflow: hidden;
+      animation: up 0.38s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes up {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card.refresh { animation: none; }
+
+    .grad-bar { height: 5px; background: linear-gradient(90deg, #3BBFB2 0%, #6DC96A 55%, #F5C842 100%); }
+    .inner { padding: 1.8rem 2rem 2rem; }
+
+    /* INTRO */
+    .intro-brand { text-align: center; margin-bottom: 1.2rem; }
+    .brand-name { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.9rem; color: #1B2D5C; letter-spacing: -0.02em; }
+    .divider { height: 1px; background: #E4EAF2; margin: 1.1rem 0; }
+    .intro-title { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.25rem; color: #1B2D5C; text-align: center; margin-bottom: 0.4rem; }
+    .intro-sub { font-size: 0.82rem; color: #8892A8; text-align: center; line-height: 1.6; margin-bottom: 1.5rem; }
+
+    /* PROGRESS */
+    .prog-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1.3rem; }
+    .prog-track { flex: 1; height: 6px; background: #E4EAF2; border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, #3BBFB2 0%, #6DC96A 55%, #F5C842 100%); border-radius: 99px; transition: width 0.35s cubic-bezier(.22,1,.36,1); }
+    .prog-lbl { font-size: 0.72rem; font-weight: 600; color: #8892A8; white-space: nowrap; }
+
+    /* QUESTION */
+    .q-emoji { font-size: 1.7rem; display: block; margin-bottom: 0.45rem; }
+    .q-text { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.05rem; color: #1B2D5C; line-height: 1.4; margin-bottom: 1.1rem; }
+
+    .options { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.2rem; }
+    .opt {
+      background: #ECF0F6; border: 1.5px solid #E4EAF2; border-radius: 11px;
+      color: #3A4560; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 500; text-align: left;
+      padding: 0.75rem 0.95rem; cursor: pointer;
+      display: flex; align-items: center; gap: 0.6rem;
+      transition: border-color 0.15s, background 0.15s, transform 0.12s;
+      width: 100%;
+    }
+    .opt:hover:not(.sel) { border-color: #3BBFB2; background: #F0FAFA; transform: translateX(3px); }
+    .opt.sel { border-color: #3BBFB2; background: #E6F7F6; color: #1B2D5C; font-weight: 600; transform: translateX(3px); }
+
+    .dot {
+      width: 16px; height: 16px; border-radius: 50%; border: 2px solid #E4EAF2; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .opt.sel .dot { border-color: #3BBFB2; background: #3BBFB2; }
+    .dot-inner { width: 5px; height: 5px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity 0.12s; }
+    .opt.sel .dot-inner { opacity: 1; }
+
+    /* BUTTON */
+    .btn {
+      display: block; width: 100%; background: #3BBFB2; color: #fff; border: none;
+      border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 800;
+      font-size: 0.95rem; padding: 0.88rem; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(59,191,178,0.25);
+      transition: background 0.15s, transform 0.12s, box-shadow 0.12s;
+    }
+    .btn:hover:not(:disabled) { background: #2EA89C; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(59,191,178,0.35); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    /* RESULTS */
+    .res-header { text-align: center; margin-bottom: 1.4rem; }
+    .res-header h2 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.25rem; color: #1B2D5C; margin-bottom: 0.3rem; }
+    .res-header p { font-size: 0.79rem; color: #8892A8; }
+
+    .skill-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.4rem; }
+    .skill-row {
+      border: 1.5px solid #E4EAF2; border-radius: 13px;
+      padding: 0.95rem 1.05rem; background: #fff;
+      opacity: 0; animation: up 0.4s cubic-bezier(.22,1,.36,1) forwards;
+    }
+    .skill-row:nth-child(1) { animation-delay: 0.08s; border-color: #3BBFB2; background: #F0FAFA; }
+    .skill-row:nth-child(2) { animation-delay: 0.18s; }
+    .skill-row:nth-child(3) { animation-delay: 0.28s; }
+
+    .skill-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem; }
+    .rank-lbl { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8892A8; }
+    .skill-row:nth-child(1) .rank-lbl { color: #3BBFB2; }
+    .skill-chip { display: inline-flex; align-items: center; gap: 0.28rem; padding: 0.22rem 0.7rem; border-radius: 99px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.83rem; }
+    .skill-desc { font-size: 0.75rem; color: #8892A8; line-height: 1.5; }
+    .sbar { margin-top: 0.6rem; height: 4px; background: #E4EAF2; border-radius: 99px; overflow: hidden; }
+    .sbar-fill { height: 100%; background: linear-gradient(90deg, #3BBFB2 0%, #6DC96A 55%, #F5C842 100%); border-radius: 99px; width: 0%; transition: width 0.9s cubic-bezier(.22,1,.36,1); }
+
+    .restart { display: block; text-align: center; font-size: 0.77rem; color: #8892A8; cursor: pointer; background: none; border: none; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; margin-top: 0.55rem; transition: color 0.14s; }
+    .restart:hover { color: #1B2D5C; }
+
+    .footer { margin-top: 1.1rem; font-size: 0.69rem; color: #B0B8C8; text-align: center; }
+    .footer span { color: #3BBFB2; font-weight: 700; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" id="card">
+    <div class="grad-bar"></div>
+    <div class="inner" id="screen"></div>
+  </div>
+  <p class="footer">© 2025 <span>Sirb</span>. All rights reserved.</p>
+</div>
+
+<script>
+  const QUESTIONS = [
+    {
+      emoji: "📚",
+      scenario: "Your prof assigns a group project. What do you do first?",
+      options: [
+        { text: "Divide tasks and lead the group",      skills: { leadership: 3, teamWork: 1 } },
+        { text: "Research the topic thoroughly",         skills: { research: 3, dataAnalysis: 1 } },
+        { text: "Brainstorm a creative angle",           skills: { innovation: 3, problemSolving: 1 } },
+        { text: "Start coding the solution",             skills: { programming: 3 } },
+      ],
+    },
+    {
+      emoji: "🧩",
+      scenario: "Something's broken in your project. Your go-to move?",
+      options: [
+        { text: "Debug it step by step",                 skills: { problemSolving: 3, programming: 1 } },
+        { text: "Look up how others solved it",          skills: { research: 3 } },
+        { text: "Ask the team to tackle it together",    skills: { teamWork: 3, communication: 1 } },
+        { text: "Try a completely different approach",   skills: { innovation: 3, problemSolving: 1 } },
+      ],
+    },
+    {
+      emoji: "🎤",
+      scenario: "Your group needs someone to present. You...",
+      options: [
+        { text: "Volunteer — you're comfortable up front",         skills: { communication: 3, leadership: 1 } },
+        { text: "Help the presenter prep their talking points",    skills: { communication: 2, teamWork: 2 } },
+        { text: "Handle the slides and visuals instead",           skills: { dataAnalysis: 2, innovation: 1 } },
+        { text: "Stick to your technical role",                    skills: { programming: 2, problemSolving: 1 } },
+      ],
+    },
+    {
+      emoji: "📊",
+      scenario: "You need to make a decision. What helps you most?",
+      options: [
+        { text: "Data and numbers",              skills: { dataAnalysis: 3, research: 1 } },
+        { text: "What the team thinks",          skills: { teamWork: 3, communication: 1 } },
+        { text: "Your gut + some research",      skills: { innovation: 2, research: 2 } },
+        { text: "A clear logical breakdown",     skills: { problemSolving: 3 } },
+      ],
+    },
+    {
+      emoji: "🌟",
+      scenario: "Which project sounds most exciting to you?",
+      options: [
+        { text: "Building a working app from scratch",               skills: { programming: 3, innovation: 1 } },
+        { text: "Writing a research paper on something new",         skills: { research: 3, dataAnalysis: 1 } },
+        { text: "Leading a team to win a competition",               skills: { leadership: 3, teamWork: 1 } },
+        { text: "Designing a creative solution to a real problem",   skills: { innovation: 3, problemSolving: 2 } },
+      ],
+    },
+    {
+      emoji: "🤝",
+      scenario: "What's your usual role in a group?",
+      options: [
+        { text: "The organizer who keeps everyone on track",  skills: { leadership: 3, teamWork: 1 } },
+        { text: "The one who does the research",              skills: { research: 3 } },
+        { text: "The communicator who keeps things clear",    skills: { communication: 3, teamWork: 1 } },
+        { text: "The builder who gets things done",           skills: { programming: 3, problemSolving: 1 } },
+      ],
+    },
+  ];
+
+  const SKILL_META = {
+    leadership:     { label: "Leadership",      color: "#D4EDFF", text: "#2A7EB8", emoji: "🧭" },
+    research:       { label: "Research",        color: "#FFF0D4", text: "#B87A00", emoji: "🔍" },
+    communication:  { label: "Communication",   color: "#FFE8F6", text: "#B8267A", emoji: "💬" },
+    problemSolving: { label: "Problem Solving", color: "#E8F7E8", text: "#2A8C2A", emoji: "🧩" },
+    programming:    { label: "Programming",     color: "#EDE8FF", text: "#5A2AB8", emoji: "💻" },
+    innovation:     { label: "Innovation",      color: "#FFF3E0", text: "#B85A00", emoji: "✨" },
+    teamWork:       { label: "Teamwork",        color: "#E6F7F6", text: "#2EA89C", emoji: "🤝" },
+    dataAnalysis:   { label: "Data Analysis",   color: "#F0E8FF", text: "#7A2AB8", emoji: "📊" },
+  };
+
+  const SKILL_DESCS = {
+    leadership:     "You keep the team aligned and own the outcome when things get uncertain.",
+    research:       "When everyone guesses, you go find out. You love going deep on a topic.",
+    communication:  "You make ideas clear and keep people in the loop — no one's left behind.",
+    problemSolving: "You can't leave a broken thing alone. You trace issues right to the root.",
+    programming:    "Code is your fastest path from idea to reality. You love building things.",
+    innovation:     "You're always asking 'but what if we did it differently?' Constraints are invitations.",
+    teamWork:       "You make the whole group better. You lift others and it shows.",
+    dataAnalysis:   "You trust patterns over gut feelings. You pull up the numbers before deciding.",
+  };
+
+  const RANK_LABELS = ["Best Match", "Strong Match", "Third Match"];
+
+  let cur = 0;
+  let scores = {};
+  let selectedOpt = null;
+
+  function render(html) {
+    const card = document.getElementById('card');
+    card.style.animation = 'none';
+    document.getElementById('screen').innerHTML = html;
+    requestAnimationFrame(() => {
+      card.style.animation = 'up 0.38s cubic-bezier(.22,1,.36,1) both';
+    });
+  }
+
+  function showIntro() {
+    render(`
+      <div class="intro-brand"><span class="brand-name">Sirb</span></div>
+      <div class="divider"></div>
+      <div class="intro-title">Find your top skills ✨</div>
+      <p class="intro-sub">6 quick questions to discover your best skills.<br>Takes less than 2 minutes!</p>
+      <button class="btn" onclick="startQuiz()">Start →</button>
+    `);
+  }
+
+  function startQuiz() {
+    cur = 0; scores = {}; selectedOpt = null;
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const q = QUESTIONS[cur];
+    const pct = (cur / QUESTIONS.length) * 100;
+    const isLast = cur + 1 === QUESTIONS.length;
+
+    const optionsHTML = q.options.map((opt, i) => `
+      <button class="opt" id="opt-${i}" onclick="selectOpt(${i})">
+        <span class="dot"><span class="dot-inner"></span></span>
+        ${opt.text}
+      </button>
+    `).join('');
+
+    render(`
+      <div class="prog-row">
+        <div class="prog-track"><div class="prog-fill" id="prog" style="width:${pct}%"></div></div>
+        <span class="prog-lbl">${cur + 1} / ${QUESTIONS.length}</span>
+      </div>
+      <span class="q-emoji">${q.emoji}</span>
+      <div class="q-text">${q.scenario}</div>
+      <div class="options">${optionsHTML}</div>
+      <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>
+        ${isLast ? "See my results 🎉" : "Next →"}
+      </button>
+    `);
+  }
+
+  function selectOpt(i) {
+    selectedOpt = i;
+    document.querySelectorAll('.opt').forEach((el, idx) => {
+      el.classList.toggle('sel', idx === i);
+    });
+    document.getElementById('next-btn').disabled = false;
+  }
+
+  function nextQuestion() {
+    if (selectedOpt === null) return;
+    const chosen = QUESTIONS[cur].options[selectedOpt];
+    Object.entries(chosen.skills).forEach(([k, v]) => {
+      scores[k] = (scores[k] || 0) + v;
+    });
+    selectedOpt = null;
+    cur++;
+    if (cur < QUESTIONS.length) {
+      showQuestion();
+    } else {
+      showResults();
+    }
+  }
+
+  function showResults() {
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const top3 = sorted.slice(0, 3);
+    const maxS = top3[0][1];
+
+    const rowsHTML = top3.map(([skill, score], i) => {
+      const m = SKILL_META[skill];
+      const pct = Math.round((score / maxS) * 100);
+      return `
+        <div class="skill-row">
+          <div class="skill-top">
+            <span class="rank-lbl">${RANK_LABELS[i]}</span>
+            <span class="skill-chip" style="background:${m.color};color:${m.text}">${m.emoji} ${m.label}</span>
+          </div>
+          <p class="skill-desc">${SKILL_DESCS[skill]}</p>
+          <div class="sbar"><div class="sbar-fill" data-pct="${pct}"></div></div>
+        </div>
+      `;
+    }).join('');
+
+    render(`
+      <div class="res-header">
+        <h2>Your Top Skills 🎯</h2>
+        <p>Add these to your Sirb profile to find the right teammates!</p>
+      </div>
+      <div class="skill-list">${rowsHTML}</div>
+      <button class="btn" onclick="startQuiz()">Retake the quiz</button>
+      <button class="restart" onclick="startQuiz()">Start over</button>
+    `);
+
+    // Animate bars after render
+    setTimeout(() => {
+      document.querySelectorAll('.sbar-fill').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    }, 150);
+  }
+
+  // Init
+  showIntro();
+</script>
+</body>
+</html>
